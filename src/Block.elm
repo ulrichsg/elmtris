@@ -28,6 +28,28 @@ render model =
             |> List.map renderSquare
 
 
+renderAt: Model -> Int -> Int -> Block -> List Form
+renderAt model x y block =
+    let
+        gridSize = model.field.gridSize
+        blockSquares = block.shape
+            |> squares
+            |> rotate block.rotation
+        blockWidth = width blockSquares * gridSize
+        blockHeight = height blockSquares * gridSize
+
+        renderSquare = \square ->
+            let
+                sx = x + square.x * gridSize - blockWidth // 2
+                sy = y + square.y * gridSize - blockHeight // 2
+            in
+                Collage.square (toFloat gridSize)
+                    |> filled (color block.shape)
+                    |> move (toFloat sx, toFloat sy)
+    in
+        List.map renderSquare blockSquares
+
+
 squares: Shape -> List Square
 squares shape =
     let

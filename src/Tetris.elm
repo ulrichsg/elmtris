@@ -1,17 +1,12 @@
-import Html exposing (..)
 import Html.App as App
 import AnimationFrame
 import Keyboard
 import Random.Pcg as Random
 
-import Collage exposing (..)
-import Element exposing (..)
-import Color exposing (..)
-import Text
-
 import Types exposing (..)
 import Block
 import Structure
+import View
 
 type Msg = KeyDown Int | Tick Float | BlockLanded
 
@@ -49,54 +44,6 @@ init =
             moveInterval = 50.0,
             randomSeed = actualSeed
         }
-
-view: Model -> Html msg
-view model =
-    let
-        totalWidth = model.field.width + model.field.sidebarWidth
-        (w, h) = (toFloat totalWidth, toFloat model.field.height)
-
-        background = rect w h |> filled black
-        block = Block.render model
-        structure = Structure.render model
-
-        gameOver = if model.status == GameOver
-            then [
-                Text.fromString "Game Over"
-                    |> Text.typeface ["sans-serif"]
-                    |> Text.height 40
-                    |> Text.color red
-                    |> Collage.text
-                    |> moveX (toFloat (-1 * model.field.sidebarWidth // 2))
-            ]
-            else []
-
-        sidebarText yPos text =
-            Text.fromString text
-                |> Text.typeface ["sans-serif"]
-                |> Text.height 20
-                |> Text.color black
-                |> Collage.text
-                |> move (toFloat (model.field.width // 2), toFloat (model.field.height // 2 - yPos))
-
-        nextBlock block = []
-
-        sidebar = [
-            rect (toFloat model.field.sidebarWidth) (toFloat model.field.height)
-                |> filled darkGray
-                |> moveX (toFloat (model.field.width // 2)),
-            sidebarText 30 "Next",
-            sidebarText 150 "Level",
-            sidebarText 180 (toString model.level),
-            sidebarText 240 "Lines",
-            sidebarText 270 (toString model.lines),
-            sidebarText 330 "Score",
-            sidebarText 360 (toString model.score)
-        ] ++ nextBlock model.nextBlock
-
-        elems = [background] ++ block ++ structure ++ sidebar ++ gameOver
-    in
-        collage totalWidth model.field.height elems |> toHtml
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update action model =
@@ -201,7 +148,7 @@ subscriptions model = Sub.batch [
 main: Program Never
 main = App.program {
     init = (init, Cmd.none),
-    view = view,
+    view = View.render,
     update = update,
     subscriptions = subscriptions
     }
