@@ -8,7 +8,8 @@ type Status = Ready | Running | GameOver
 type alias Field = {
     width: Int,
     height: Int,
-    gridSize: Int
+    gridSize: Int,
+    sidebarWidth: Int
 }
 
 type Shape = I | O | T | S | Z | L | J
@@ -27,6 +28,8 @@ type alias Model = {
     status: Status,
     field: Field,
     lines: Int,
+    level: Int,
+    score: Int,
     currentBlock: Block,
     nextBlock: Block,
     structure: Structure,

@@ -15,7 +15,7 @@ render model =
 
         renderSquare = \square ->
             let
-                sx = (model.x + square.x) * gridSize + 10
+                sx = (model.x + square.x) * gridSize + 10 - (model.field.sidebarWidth // 2)
                 sy = (model.y + square.y) * gridSize + 10
             in
                 Collage.square gridSize

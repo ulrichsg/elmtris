@@ -6,6 +6,8 @@ import Block
 import Collage exposing (filled, move)
 import Debug
 import String
+import Array
+import Maybe
 
 fixBlock: Model -> Model
 fixBlock model =
@@ -26,7 +28,7 @@ render model =
         gridSize = model.field.gridSize
         renderSquare = \square ->
             let
-                sx = square.x * gridSize + 10
+                sx = square.x * gridSize + 10 - (model.field.sidebarWidth // 2)
                 sy = square.y * gridSize + 10
             in
                 Collage.square gridSize
@@ -86,6 +88,7 @@ removeCompletedLines model =
         isCompleted y = countSquares y >= widthSquares
 
         completedLines = List.filter isCompleted allYCoords
+        numCompletedLines = List.length completedLines
 
         removeLines ys structure = List.filter (\{y} -> not (List.member y ys)) structure
 
@@ -97,8 +100,16 @@ removeCompletedLines model =
             structure = model.structure
                 |> removeLines completedLines
                 |> dropLinesAbove completedLines,
-            lines = model.lines + List.length completedLines
+
+            lines = model.lines + numCompletedLines,
+            score = model.score + points numCompletedLines model.level
         }
+
+points completedLines level =
+    let
+        basePoints = (Array.fromList [0, 40, 100, 300, 1200]) |> Array.get completedLines |> Maybe.withDefault 0
+    in
+        basePoints * level
 
 checkGameOver model =
     let
