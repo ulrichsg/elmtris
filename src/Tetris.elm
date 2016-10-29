@@ -15,7 +15,7 @@ startingY field block =
         |> Block.rotate block.rotation
         |> Block.height
     in
-        top field -  blockHeight
+        top field - blockHeight - 1
 
 init: Model
 init =
@@ -42,7 +42,8 @@ init =
             dropInterval = 1000.0,
             lastMove = 0.0,
             moveInterval = 50.0,
-            randomSeed = actualSeed
+            randomSeed = actualSeed,
+            debug = ["Game started."]
         }
 
 update: Msg -> Model -> (Model, Cmd Msg)
@@ -59,12 +60,14 @@ update action model =
 processBlockLanded model =
     let
         (nextBlock, nextSeed) = Block.random model.randomSeed
+        y = startingY model.field model.nextBlock
         dropNextBlock model = { model |
             currentBlock = model.nextBlock,
             nextBlock = nextBlock,
             x = -1,
-            y = startingY model.field nextBlock,
+            y = y,
             randomSeed = nextSeed
+            -- debug = model.debug ++ ["Dropping new " ++ (toString model.nextBlock.shape) ++ " block at y = " ++ (toString y)]
         }
     in
         model
@@ -111,10 +114,12 @@ moveDown model =
 rotate model =
     let
         currentBlock = model.currentBlock
-        newRotation = (currentBlock.rotation + 1) % 4
-        rotatedBlock = { currentBlock | rotation = newRotation }
+        rotatedBlock = { currentBlock | rotation = (currentBlock.rotation + 1) % 4 }
+        newModel = { model | currentBlock = rotatedBlock }
     in
-        { model | currentBlock = rotatedBlock}
+        if Structure.overlaps newModel || Structure.blockOutOfBounds newModel
+        then model
+        else newModel
 
 fall model =
     let

@@ -75,6 +75,22 @@ touchesFromRight model =
     in
         tryAll touchesFromRight' model.structure (blockToSquares model)
 
+overlaps: Model -> Bool
+overlaps model =
+    let
+        equals square1 square2 = square1.x == square2.x && square1.y == square2.y
+    in
+        tryAll equals model.structure (blockToSquares model)
+
+blockOutOfBounds: Model -> Bool
+blockOutOfBounds model =
+    let
+        field = model.field
+        outOfBounds square =
+            square.x < leftBorder field || square.x > rightBorder field
+            || square.y <= bottom field || square.y >= top field
+    in
+        blockToSquares model |> List.any outOfBounds
 
 removeCompletedLines model =
     let

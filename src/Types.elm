@@ -40,7 +40,8 @@ type alias Model = {
     dropInterval: Float,
     lastMove: Float,
     moveInterval: Float,
-    randomSeed: Random.Seed
+    randomSeed: Random.Seed,
+    debug: List String
 }
 
 
