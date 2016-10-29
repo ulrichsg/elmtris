@@ -8,7 +8,7 @@ import Block
 import Structure
 import View
 
-type Msg = KeyDown Int | Tick Float | BlockLanded
+type Msg = KeyDown Int | Tick Float
 
 startingY field block =
     let blockHeight = Block.squares block.shape
@@ -48,14 +48,58 @@ init =
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update action model =
-    if model.status == Running then
-        case action of
-            KeyDown key -> (control key model, Cmd.none)
-            Tick dt -> step dt model
-            BlockLanded -> (processBlockLanded model, Cmd.none)
-    else
-        (model, Cmd.none)
+    case (model.status, action) of
+        (Running, KeyDown key) -> (control key model, Cmd.none)
+        (Running, Tick dt) -> (step dt model, Cmd.none)
+        _ -> (model, Cmd.none)
 
+step: Float -> Model -> Model
+step dt model =
+    let
+        newModel = { model | t = model.t + dt }
+        fall model = { model | y = model.y - 1, lastDrop = model.t }
+    in
+        if newModel.t >= model.lastDrop + model.dropInterval
+        then newModel
+            |> checkBlockLanded
+            |> fall
+        else newModel
+
+control key model =
+    if model.t >= model.lastMove + model.moveInterval
+    then
+        case key of
+            37 -> moveLeft model
+            38 -> rotate model
+            39 -> moveRight model
+            40 -> moveDown model
+            _ -> model
+    else model
+
+moveBlock: (Model -> Model) -> Model -> Model
+moveBlock op model =
+    let
+        newModel = op model
+    in
+        if Structure.overlaps newModel || Structure.blockOutOfBounds newModel
+        then model
+        else newModel
+
+moveLeft = moveBlock (\model -> { model | x = model.x - 1, lastMove = model.t })
+moveRight = moveBlock (\model -> { model | x = model.x + 1, lastMove = model.t })
+moveDown = moveBlock (\model -> { model | y = model.y - 1, lastMove = model.t })
+
+rotate model =
+    let
+        currentBlock = model.currentBlock
+        rotatedBlock = { currentBlock | rotation = (currentBlock.rotation + 1) % 4 }
+    in
+        moveBlock (\model -> { model | currentBlock = rotatedBlock }) model
+
+checkBlockLanded model =
+    if model.y <= bottom model.field || Structure.touchesFromAbove model
+    then processBlockLanded(model)
+    else model
 
 processBlockLanded model =
     let
@@ -67,76 +111,14 @@ processBlockLanded model =
             x = -1,
             y = y,
             randomSeed = nextSeed
-            -- debug = model.debug ++ ["Dropping new " ++ (toString model.nextBlock.shape) ++ " block at y = " ++ (toString y)]
         }
     in
         model
-            |> Structure.removeCompletedLines -- todo make a separate command for this
+            |> Structure.fixBlock
+            |> Structure.removeCompletedLines
             |> Structure.checkGameOver
             |> checkNextLevel
             |> dropNextBlock
-
-step: Float -> Model -> (Model, Cmd Msg)
-step dt model =
-    { model | t = model.t + dt }
-        |> fall
-        |> checkBlockLanded
-
-control key model =
-    if model.t >= model.lastMove + model.moveInterval
-    then
-        case key of
-            37 -> moveLeft model
-            38 -> rotate model
-            39 -> moveRight model
-            40 -> moveDown model
-            _ -> model
-        else model
-
-blockWidth block = block.shape |> Block.squares |> Block.rotate block.rotation |> Block.width
-blockHeight block = block.shape |> Block.squares |> Block.rotate block.rotation |> Block.height
-
-moveLeft model =
-    if model.x <= leftBorder model.field || Structure.touchesFromRight model
-    then model
-    else { model | x = model.x - 1, lastMove = model.t }
-
-moveRight model =
-    if model.x + blockWidth model.currentBlock >= rightBorder model.field || Structure.touchesFromLeft model
-    then model
-    else { model | x = model.x + 1, lastMove = model.t }
-
-moveDown model =
-    if model.y <= bottom model.field || Structure.touchesFromAbove model
-    then model
-    else { model | y = model.y - 1, lastMove = model.t }
-
-rotate model =
-    let
-        currentBlock = model.currentBlock
-        rotatedBlock = { currentBlock | rotation = (currentBlock.rotation + 1) % 4 }
-        newModel = { model | currentBlock = rotatedBlock }
-    in
-        if Structure.overlaps newModel || Structure.blockOutOfBounds newModel
-        then model
-        else newModel
-
-fall model =
-    let
-        isDrop = model.t >= model.lastDrop + model.dropInterval
-    in
-        { model |
-            y = if isDrop then model.y - 1 else model.y,
-            lastDrop = if isDrop then model.t else model.lastDrop
-        }
-
-checkBlockLanded model =
-    let
-        isLanded = (model.y <= bottom model.field) || Structure.touchesFromAbove model
-    in
-        if isLanded
-        then model |> Structure.fixBlock |> update BlockLanded
-        else (model, Cmd.none)
 
 checkNextLevel model =
     if model.lines // 10 >= model.level

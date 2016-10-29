@@ -61,20 +61,6 @@ touchesFromAbove model =
     in
         tryAll touchesFromAbove' model.structure (blockToSquares model)
 
-touchesFromLeft: Model -> Bool
-touchesFromLeft model =
-    let
-        touchesFromLeft' square1 square2 = square1.y == square2.y && square1.x == square2.x - 1
-    in
-        tryAll touchesFromLeft' model.structure (blockToSquares model)
-
-touchesFromRight: Model -> Bool
-touchesFromRight model =
-    let
-        touchesFromRight' square1 square2 = square1.y == square2.y && square1.x == square2.x + 1
-    in
-        tryAll touchesFromRight' model.structure (blockToSquares model)
-
 overlaps: Model -> Bool
 overlaps model =
     let
@@ -88,7 +74,7 @@ blockOutOfBounds model =
         field = model.field
         outOfBounds square =
             square.x < leftBorder field || square.x > rightBorder field
-            || square.y <= bottom field || square.y >= top field
+            || square.y < bottom field || square.y > top field
     in
         blockToSquares model |> List.any outOfBounds
 
