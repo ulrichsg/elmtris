@@ -80,8 +80,8 @@ step dt model =
                 |> checkBlockLanded
                 |> fall
             else newModel
-        command = if newModel.status == GameOver
-            then Ports.highScore model.highScore
+        command = if nextModel.status == GameOver
+            then Ports.highScore nextModel.highScore
             else Cmd.none
     in
         (nextModel, command)
@@ -95,18 +95,14 @@ dropNextBlock model =
     let
         newBlock = model.nextBlock
         (nextBlock, nextSeed) = Block.random model.randomSeed
-        newModel = { model |
+    in
+        { model |
             currentBlock = newBlock,
             nextBlock = nextBlock,
             x = startingX,
             y = startingY model.field model.structure newBlock,
             randomSeed = nextSeed
         }
-        gameOver = False
-    in
-        if gameOver
-            then { newModel | status = GameOver, highScore = max model.score model.highScore }
-            else newModel
 
 processBlockLanded model =
     let

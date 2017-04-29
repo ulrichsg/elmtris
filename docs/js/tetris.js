@@ -11835,12 +11835,11 @@ var _ulrichsg$elmtris$Main$init = function (flags) {
 	return {ctor: '_Tuple2', _0: initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 };
 var _ulrichsg$elmtris$Main$dropNextBlock = function (model) {
-	var gameOver = false;
 	var _p2 = _ulrichsg$elmtris$Block$random(model.randomSeed);
 	var nextBlock = _p2._0;
 	var nextSeed = _p2._1;
 	var newBlock = model.nextBlock;
-	var newModel = _elm_lang$core$Native_Utils.update(
+	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
 			currentBlock: newBlock,
@@ -11849,12 +11848,6 @@ var _ulrichsg$elmtris$Main$dropNextBlock = function (model) {
 			y: A3(_ulrichsg$elmtris$Main$startingY, model.field, model.structure, newBlock),
 			randomSeed: nextSeed
 		});
-	return gameOver ? _elm_lang$core$Native_Utils.update(
-		newModel,
-		{
-			status: _ulrichsg$elmtris$Types$GameOver,
-			highScore: A2(_elm_lang$core$Basics$max, model.score, model.highScore)
-		}) : newModel;
 };
 var _ulrichsg$elmtris$Main$processBlockLanded = function (model) {
 	var newModel = _ulrichsg$elmtris$Structure$checkGameOver(
@@ -11881,7 +11874,7 @@ var _ulrichsg$elmtris$Main$step = F2(
 			{t: model.t + dt});
 		var nextModel = (_elm_lang$core$Native_Utils.cmp(newModel.t, model.lastDrop + model.dropInterval) > -1) ? fall(
 			_ulrichsg$elmtris$Main$checkBlockLanded(newModel)) : newModel;
-		var command = _elm_lang$core$Native_Utils.eq(newModel.status, _ulrichsg$elmtris$Types$GameOver) ? _ulrichsg$elmtris$Ports$highScore(model.highScore) : _elm_lang$core$Platform_Cmd$none;
+		var command = _elm_lang$core$Native_Utils.eq(nextModel.status, _ulrichsg$elmtris$Types$GameOver) ? _ulrichsg$elmtris$Ports$highScore(nextModel.highScore) : _elm_lang$core$Platform_Cmd$none;
 		return {ctor: '_Tuple2', _0: nextModel, _1: command};
 	});
 var _ulrichsg$elmtris$Main$update = F2(
