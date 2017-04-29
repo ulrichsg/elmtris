@@ -30,6 +30,7 @@ type alias Model = {
     lines: Int,
     level: Int,
     score: Int,
+    highScore: Int,
     currentBlock: Block,
     nextBlock: Block,
     structure: Structure,
@@ -40,8 +41,7 @@ type alias Model = {
     dropInterval: Float,
     lastMove: Float,
     moveInterval: Float,
-    randomSeed: Random.Seed,
-    debug: List String
+    randomSeed: Random.Seed
 }
 
 

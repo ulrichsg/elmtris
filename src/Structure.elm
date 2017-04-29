@@ -38,13 +38,15 @@ render model =
         List.map renderSquare model.structure
 
 
-blockToSquares model =
+currentBlockToSquares model = blockToSquares model.currentBlock model.x model.y
+
+blockToSquares block bx by =
     let
-        transformSquares = List.map (\{x, y} -> { x = x + model.x, y = y + model.y })
+        transformSquares = List.map (\{x, y} -> { x = x + bx, y = y + by })
     in
-        model.currentBlock.shape
+        block.shape
             |> Block.squares
-            |> Block.rotate model.currentBlock.rotation
+            |> Block.rotate block.rotation
             |> transformSquares
 
 tryAll f structure squares =
@@ -59,14 +61,17 @@ touchesFromAbove model =
     let
         touchesFromAbove' square1 square2 = square1.x == square2.x && square1.y == square2.y + 1
     in
-        tryAll touchesFromAbove' model.structure (blockToSquares model)
+        tryAll touchesFromAbove' model.structure (currentBlockToSquares model)
 
 overlaps: Model -> Bool
-overlaps model =
+overlaps model = overlapsBlock model.structure model.currentBlock model.x model.y
+
+overlapsBlock: Structure -> Block -> Int -> Int -> Bool
+overlapsBlock structure block x y =
     let
         equals square1 square2 = square1.x == square2.x && square1.y == square2.y
     in
-        tryAll equals model.structure (blockToSquares model)
+        tryAll equals structure (blockToSquares block x y)
 
 blockOutOfBounds: Model -> Bool
 blockOutOfBounds model =
@@ -76,7 +81,7 @@ blockOutOfBounds model =
             square.x < leftBorder field || square.x > rightBorder field
             || square.y < bottom field || square.y > top field
     in
-        blockToSquares model |> List.any outOfBounds
+        currentBlockToSquares model |> List.any outOfBounds
 
 removeCompletedLines model =
     let
@@ -117,11 +122,12 @@ checkGameOver model =
     let
         upperBound = top model.field
         touchesTop' square = square.y > upperBound
-        touchesTop model = List.any touchesTop' (blockToSquares model)
+        touchesTop model = List.any touchesTop' (currentBlockToSquares model)
         isGameOver model = touchesTop model && touchesFromAbove model
     in
         if (isGameOver model)
         then { model |
-            status = GameOver
+            status = GameOver,
+            highScore = max model.score model.highScore
         }
         else model
