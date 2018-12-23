@@ -2,34 +2,33 @@ module Control exposing (control)
 
 import Types exposing (..)
 import Structure
+import Field
+import Block exposing (Block)
+import Keyboard exposing (Key(..))
 
+control: Key -> Model -> Model
 control key model =
     if model.t >= model.lastMove + model.moveInterval
     then
         case key of
-            37 -> moveLeft model
-            38 -> rotate model
-            39 -> moveRight model
-            40 -> moveDown model
-            _ -> model
+            Left -> moveLeft model
+            Rotate -> rotate model
+            Right -> moveRight model
+            Down -> moveDown model
+            Other -> model
     else model
 
-moveBlock: (Model -> Model) -> Model -> Model
+moveBlock: (Block -> Block) -> Model -> Model
 moveBlock op model =
     let
-        newModel = op model
+        newBlock = op model.currentBlock
+        newModel = { model | currentBlock = newBlock, lastMove = model.t }
     in
-        if Structure.overlaps newModel || Structure.blockOutOfBounds newModel
+        if Structure.overlaps newBlock newModel.structure || Field.blockOutOfBounds newBlock newModel.field
         then model
         else newModel
 
-moveLeft = moveBlock (\model -> { model | x = model.x - 1, lastMove = model.t })
-moveRight = moveBlock (\model -> { model | x = model.x + 1, lastMove = model.t })
-moveDown = moveBlock (\model -> { model | y = model.y - 1, lastMove = model.t })
-
-rotate model =
-    let
-        currentBlock = model.currentBlock
-        rotatedBlock = { currentBlock | rotation = (currentBlock.rotation + 1) % 4 }
-    in
-        moveBlock (\model -> { model | currentBlock = rotatedBlock }) model
+moveLeft = moveBlock (\block -> { block | x = block.x - 1 })
+moveRight = moveBlock (\block -> { block | x = block.x + 1 })
+moveDown = moveBlock (\block -> { block | y = block.y + 1 })
+rotate = moveBlock (\block -> { block | rotation = modBy 4 (block.rotation + 1) })
