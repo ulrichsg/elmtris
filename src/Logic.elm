@@ -40,7 +40,7 @@ checkBlockLanded model =
     let
         block = model.currentBlock
     in
-    if Block.bottomY block >= Field.maxY model.field || Structure.touchesFromAbove block model.structure
+    if Block.bottomY block >= model.field.height - 1 || Structure.touchesFromAbove block model.structure
     then processBlockLanded model
     else model
 
@@ -89,14 +89,12 @@ isLineCompleted model lineNum =
             model.structure
                 |> List.filter (\{ y } -> y == l)
                 |> List.length
-
-        squaresPerLine = model.field.width // model.field.gridSize
     in
-    countSquares lineNum >= squaresPerLine
+    countSquares lineNum >= model.field.width
 
 removeCompletedLines model =
     let
-        allYCoords = List.range 0 (Field.maxY model.field)
+        allYCoords = List.range 0 (model.field.height - 1)
         completedLines = List.filter (isLineCompleted model) allYCoords
         numCompletedLines = List.length completedLines
         removeLines ys structure = List.filter (\{ y } -> not (List.member y ys)) structure

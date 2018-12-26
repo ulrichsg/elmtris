@@ -1,7 +1,7 @@
 module Config exposing (..)
 
-fieldWidth = 200
-fieldHeight = 400
+fieldWidth = 10
+fieldHeight = 20
 gridSize = 20
 sidebarWidth = 160
 

@@ -9,12 +9,7 @@ import Structure exposing (Structure)
 type alias Field =
     { width: Int
     , height: Int
-    , gridSize: Int
-    , sidebarWidth: Int
     }
-
-maxX field = field.width // field.gridSize - 1
-maxY field = field.height // field.gridSize - 1
 
 spawnBlock: Random.Seed -> (Block, Random.Seed)
 spawnBlock seed =
@@ -52,12 +47,12 @@ blockOutOfBounds: Block -> Field -> Bool
 blockOutOfBounds block field =
     let
         outOfBounds square =
-            square.x < 0 || square.x > maxX field
-            || square.y < 0 || square.y > maxY field
+            square.x < 0 || square.x >= field.width
+            || square.y < 0 || square.y >= field.height
     in
     List.any outOfBounds (Block.toSquares block)
 
-startingX field block = (maxX field - Block.width block) // 2 - 1
+startingX field block = (field.width - Block.width block) // 2
 
 startingY field structure block =
     let

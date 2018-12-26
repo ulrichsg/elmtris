@@ -4,12 +4,10 @@ import Browser
 import Browser.Events
 import Random
 
-import Block
 import Config
 import Control exposing (control)
 import Field
 import Keyboard
-import Ports
 import Logic exposing (step)
 import Model exposing (..)
 import View
@@ -25,8 +23,6 @@ init flags =
         field =
             { width = Config.fieldWidth
             , height = Config.fieldHeight
-            , gridSize = Config.gridSize
-            , sidebarWidth = Config.sidebarWidth
             }
 
         initialSeed = Random.initialSeed flags.randomSeed

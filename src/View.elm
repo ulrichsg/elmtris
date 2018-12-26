@@ -5,25 +5,28 @@ import CanvasColor as Color exposing (Color)
 import Html exposing (Html)
 
 import Block exposing (Block)
+import Config
 import Square exposing (Shape(..), Square)
 import Structure
 import Model exposing (..)
 
 fonts = "Tahoma, Geneva, Verdana, Helvetica, Arial, Sans-Serif"
 
+displayHeight field = toFloat (field.height * Config.gridSize)
+displayWidth field = toFloat (field.width * Config.gridSize)
+
 render : Model -> Html msg
 render model =
     let
-        totalWidth = model.field.width + model.field.sidebarWidth
-        (w, h) = (toFloat totalWidth, toFloat model.field.height)
+        totalWidth = model.field.width * Config.gridSize + Config.sidebarWidth
     in
     Canvas.element
         totalWidth
-        model.field.height
+        (model.field.height * Config.gridSize)
         []
         (Canvas.empty
             |> fillStyle Color.black
-            |> fillRect 0 0 w h
+            |> fillRect 0 0 (toFloat totalWidth) (displayHeight model.field)
             |> renderStructure model
             |> renderCurrentBlock model
             |> renderSidebar model
@@ -33,8 +36,8 @@ render model =
 renderStructure : Model -> Commands -> Commands
 renderStructure model commands =
     model.structure
-        |> Square.scale model.field.gridSize
-        |> List.foldl (drawSquare model.field.gridSize) commands
+        |> Square.scale Config.gridSize
+        |> List.foldl drawSquare commands
 
 renderGameOver : Model -> Commands -> Commands
 renderGameOver model commands =
@@ -43,8 +46,8 @@ renderGameOver model commands =
         commands
     else
         let
-            width = toFloat model.field.width
-            height = toFloat model.field.height
+            width = displayWidth model.field
+            height = displayHeight model.field
         in
         commands
             |> fillStyle Color.black
@@ -59,9 +62,9 @@ renderGameOver model commands =
 renderSidebar : Model -> Commands -> Commands
 renderSidebar model commands =
     let
-        width = toFloat model.field.sidebarWidth
-        height = toFloat model.field.height
-        leftX = toFloat model.field.width
+        width = toFloat Config.sidebarWidth
+        height = displayHeight model.field
+        leftX = displayWidth model.field
         sidebarText yPos text cmds = fillText text (leftX + width / 2) yPos Nothing <| cmds
     in
     commands
@@ -86,39 +89,35 @@ renderCurrentBlock model commands =
     let
         blockSquares = model.currentBlock
                 |> Block.toSquares
-                |> Square.scale model.field.gridSize
+                |> Square.scale Config.gridSize
     in
-    List.foldl (drawSquare model.field.gridSize) commands blockSquares
+    List.foldl drawSquare commands blockSquares
 
 previewBlock : Model -> Commands -> Commands
 previewBlock model commands =
     let
-        nextBlockWidth = Block.width model.nextBlock * model.field.gridSize
-        nextBlockHeight = Block.height model.nextBlock * model.field.gridSize
+        nextBlockWidth = Block.width model.nextBlock * Config.gridSize
+        nextBlockHeight = Block.height model.nextBlock * Config.gridSize
 
-        nextBlockX = model.field.width + (model.field.sidebarWidth - nextBlockWidth) // 2
+        nextBlockX = round (displayWidth model.field) + (Config.sidebarWidth - nextBlockWidth) // 2
         nextBlockY = 75 - nextBlockHeight // 2
     in
     model.nextBlock
         |> Block.toSquares
-        |> Square.scale model.field.gridSize
+        |> Square.scale Config.gridSize
         |> Square.translate nextBlockX nextBlockY
-        |> List.foldl (drawSquare model.field.gridSize) commands
+        |> List.foldl drawSquare commands
 
-drawSquare : Int -> Square -> Commands -> Commands
-drawSquare size square commands =
-    drawSquareAt square.x square.y size (shapeToColor square.shape) <| commands
-
-drawSquareAt : Int -> Int -> Int -> Color -> Commands -> Commands
-drawSquareAt x y size color commands =
+drawSquare : Square -> Commands -> Commands
+drawSquare square commands =
     let
-        xf = toFloat x
-        yf = toFloat y
-        sf = toFloat size
+        xf = toFloat square.x
+        yf = toFloat square.y
+        sf = toFloat Config.gridSize
+        color = shapeToColor square.shape
     in
     commands
-        |> fillStyle color
-        |> fillRect xf yf sf sf
+            |> fillStyle color
 
 shapeToColor : Shape -> Color
 shapeToColor shape =
