@@ -1,4 +1,4 @@
-module Block exposing (..)
+module Block exposing (Block, toSquares, width, height, bottomY)
 
 import Square exposing (Shape(..), Square)
 
@@ -28,17 +28,13 @@ toSquares block =
         |> Square.rotate block.rotation
         |> Square.translate block.x block.y
 
-width block =
-    let
-        squares = baseSquares block |> Square.rotate block.rotation
-    in
-    1 + List.foldl (\{ x } a -> max a x) 0 squares
+measure dimension block =
+   let
+       squares = baseSquares block |> Square.rotate block.rotation
+   in
+   1 + List.foldl (\square a -> max a (dimension square)) 0 squares
 
-height block =
-    let
-        squares = baseSquares block |> Square.rotate block.rotation
-    in
-    1 + List.foldl (\{ y } a -> max a y) 0 squares
+width = measure (\{ x } -> x)
+height = measure (\{ y } -> y)
 
 bottomY = toSquares >> List.foldl (\{ y } a -> max a y) 0
-rightX = toSquares >> List.foldl (\{ x } a -> max a x) 0

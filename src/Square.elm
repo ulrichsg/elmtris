@@ -1,4 +1,4 @@
-module Square exposing (..)
+module Square exposing (Shape(..), Square, translate, scale, rotate)
 
 type Shape = I | O | T | S | Z | L | J
 
@@ -13,20 +13,6 @@ measure dimension squares = case squares of
 width = measure (\{x} -> x)
 height = measure (\{y} -> y)
 
---width: List Square -> Int
---width squares =
---    let
---        size = List.head squares |> (\square -> square.size)
---    in
---        size + List.foldl (\{x} a -> max a x) 0 squares
---
---height: List Square -> Int
---height squares =
---    let
---        size = List.head squares |> (\square -> square.size)
---    in
---        size + List.foldl (\{y} a -> max a y) 0 squares
-
 translate: Int -> Int -> List Square -> List Square
 translate dx dy = List.map (\square -> { square | x = square.x + dx, y = square.y + dy })
 
@@ -36,7 +22,7 @@ scale factor = List.map(\square ->
         | x = square.x * factor
         , y = square.y * factor
         , size = square.size * factor
-     })
+    })
 
 rotate: Int -> List Square -> List Square
 rotate times squares =

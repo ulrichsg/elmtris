@@ -1,6 +1,6 @@
 module Control exposing (control)
 
-import Types exposing (..)
+import Model exposing (..)
 import Structure
 import Field
 import Block exposing (Block)
@@ -16,7 +16,8 @@ control key model =
             Right -> moveRight model
             Down -> moveDown model
             Other -> model
-    else model
+    else
+        model
 
 moveBlock: (Block -> Block) -> Model -> Model
 moveBlock op model =
@@ -24,9 +25,9 @@ moveBlock op model =
         newBlock = op model.currentBlock
         newModel = { model | currentBlock = newBlock, lastMove = model.t }
     in
-        if Structure.overlaps newBlock newModel.structure || Field.blockOutOfBounds newBlock newModel.field
-        then model
-        else newModel
+    if Structure.overlaps newBlock newModel.structure || Field.blockOutOfBounds newBlock newModel.field
+    then model
+    else newModel
 
 moveLeft = moveBlock (\block -> { block | x = block.x - 1 })
 moveRight = moveBlock (\block -> { block | x = block.x + 1 })

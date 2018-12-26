@@ -1,9 +1,10 @@
-module Types exposing (..)
+module Model exposing (..)
 
 import Block exposing (Block)
 import Field exposing (Field)
+import Keyboard exposing (Key)
 import Structure exposing (Structure)
-import CanvasColor exposing (Color)
+
 import Random
 
 type Status = Ready | Running | GameOver
@@ -25,3 +26,7 @@ type alias Model =
     , moveInterval: Float
     , randomSeed: Random.Seed
     }
+
+type Msg
+    = KeyDown Keyboard.Key
+    | Tick Float

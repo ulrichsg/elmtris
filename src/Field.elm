@@ -55,9 +55,7 @@ blockOutOfBounds block field =
             square.x < 0 || square.x > maxX field
             || square.y < 0 || square.y > maxY field
     in
-        block
-            |> Block.toSquares
-            |> List.any outOfBounds
+    List.any outOfBounds (Block.toSquares block)
 
 startingX field block = (maxX field - Block.width block) // 2 - 1
 

@@ -1,12 +1,13 @@
 module View exposing (render)
 
-import Block exposing (Block)
 import Canvas exposing (..)
 import CanvasColor as Color exposing (Color)
 import Html exposing (Html)
+
+import Block exposing (Block)
 import Square exposing (Shape(..), Square)
 import Structure
-import Types exposing (..)
+import Model exposing (..)
 
 fonts = "Tahoma, Geneva, Verdana, Helvetica, Arial, Sans-Serif"
 
@@ -38,7 +39,8 @@ renderStructure model commands =
 renderGameOver : Model -> Commands -> Commands
 renderGameOver model commands =
     if model.status /= GameOver
-    then commands
+    then
+        commands
     else
         let
             width = toFloat model.field.width
